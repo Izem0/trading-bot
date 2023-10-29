@@ -1,0 +1,24 @@
+"""//!\\ Example strategy for demonstration purpose only. DO NOT USE, it'll make you loose money. //!\\"""
+
+import numpy as np
+import pandas as pd
+
+
+def close_cross_ma_lo(ohlcv: pd.DataFrame, sma_period: int = 50) -> pd.Series:
+    """Buy when close price crosses above sma_period-day moving average
+    Sell when close price crosses below sma_period-day moving average"""
+    # make a dataframe
+    df = pd.DataFrame(ohlcv["close"], index=ohlcv.index)
+
+    # compute moving average
+    df["sma"] = df["close"].rolling(sma_period).mean()
+
+    # get signal
+    df["signal"] = np.where(
+        (df["close"] > df["sma"]),
+        1,
+        0,
+    )
+    # shift signal by 1 period
+    df["signal"] = df["signal"].shift()
+    return df["signal"]

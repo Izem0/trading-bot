@@ -1,0 +1,11 @@
+__pycache__/
+.env
+order_response_examples/
+routine_compute_balance.py
+routine_update_fiat_transfer_table.py
+routine_update_transfer_table.py
+strategies.py
+sql/
+testing_script.py
+tests/
+venv/
