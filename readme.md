@@ -10,6 +10,6 @@ Then every day at midnight UTC, the program pulls market data (namely close pric
 ## Features
 * Automated trading based on user-defined portfolio configurations (which markets to trade with which weights ex. BTCUSDT weight=60%, ETHUSDT weight=40%)
 * Support for multiple cryptocurrency exchanges (currently Binance, Bybit and Kucoin)
-* Integration with various trading strategies (strategies are defined in `strategies.py`, in this repo I use `strategies.py.example` for demonstration purposes, I do not share my personal trading strategies :))
+* Integration with various trading strategies (strategies are defined in `strategies.py`, in this repo I use `strategies.py.example` for demonstration purposes, I do not share my personal trading strategies :smiley:)
 * Automated email notifications when order are placed
 
