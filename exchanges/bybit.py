@@ -6,7 +6,7 @@ from datetime import datetime
 import pandas as pd
 from pybit.unified_trading import HTTP
 
-from bot.exchange.base import Exchange
+from exchanges.base import Exchange
 from bot.utils import (
     camelcase_to_snakecase,
     date_to_unix,

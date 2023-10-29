@@ -3,7 +3,7 @@ from json2html import json2html
 from sqlalchemy import create_engine, types
 
 import strategies
-import bot
+import exchanges
 from bot.utils import send_email, truncate_float
 
 
@@ -16,7 +16,7 @@ class TradingBot:
         self.exchange_name = exchange_name
         self.credentials = credentials
         self.limit = limit
-        self.exchange = getattr(bot, exchange_name)(**credentials)
+        self.exchange = getattr(exchanges, exchange_name)(**credentials)
         self.engine = create_engine(db_url.replace("postgres://", "postgresql://"))
 
     def check_api_active(self):

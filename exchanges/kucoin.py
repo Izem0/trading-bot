@@ -6,7 +6,7 @@ from datetime import datetime
 import pandas as pd
 from kucoin.client import Market, Trade, User
 
-from bot.exchange.base import Exchange
+from exchanges.base import Exchange
 from bot.utils import camelcase_to_snakecase, date_to_unix, unix_to_dt
 
 
