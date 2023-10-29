@@ -75,7 +75,7 @@ def run_bot(user_id, email, exchange_name, credentials, limit, db_url):
         # compare position with signal
         if math.isclose(a=rel_size, b=signal * weight, abs_tol=0.1):
             LOG.info(
-                f"{email=} - {market=} - {signal * weight=} ~= {rel_size=:.2f} -> DO NOTHING!"
+                f"{email=} - {exchange_name=} - {market=} - {signal * weight=} ~= {rel_size=:.2f} -> DO NOTHING!"
             )
             continue
 
@@ -87,7 +87,7 @@ def run_bot(user_id, email, exchange_name, credentials, limit, db_url):
         ############
         if signal * weight > rel_size:
             LOG.info(
-                f"{exchange_name} - {email=} - {market=} - {signal=} * {weight=} = {signal * weight} > {rel_size=:.2f} -> BUY"
+                f"{email=} - {exchange_name} - {market=} - {signal=} * {weight=} = {signal * weight} > {rel_size=:.2f} -> BUY"
             )
 
             # get quantity to buy
@@ -125,7 +125,7 @@ def run_bot(user_id, email, exchange_name, credentials, limit, db_url):
         ############
         if rel_size > signal * weight:
             LOG.info(
-                f"{email=} - {market=} - {signal=} * {weight=} = {signal * weight} > {rel_size=:.2f} -> SELL"
+                f"{email=} - {exchange_name} - {market=} - {signal=} * {weight=} = {signal * weight} > {rel_size=:.2f} -> SELL"
             )
 
             # get qty to sell
