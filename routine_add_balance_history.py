@@ -6,14 +6,14 @@ from sqlalchemy import create_engine, types
 from dotenv import load_dotenv
 from infisical import InfisicalClient
 
-import bot
+import exchanges
 from bot.utils import send_email, setup_logger
 
 load_dotenv()
 
 
 # load secret token
-infisical = InfisicalClient(token=os.getenv("infisical_token"))
+infisical = InfisicalClient(token=os.getenv("INFISICAL_TOKEN"))
 # load all env variables
 infisical.get_all_secrets(attach_to_os_environ=True)
 
@@ -53,7 +53,7 @@ def main():
     for _, row in connections.iterrows():
         LOGGER.info(f"Fetching balance for {row['email']} on {row['exchange']}")
 
-        exchange = getattr(bot, row["exchange"])(
+        exchange = getattr(exchanges, row["exchange"])(
             **row["credentials"]
         )
 
