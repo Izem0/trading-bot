@@ -282,3 +282,6 @@ class Kucoin(Exchange):
     def cancel_order(self, order_id: str) -> dict:
         """Cancel open order"""
         return self.trade.cancel_order(orderId=order_id)
+    
+    def get_deposits(self):
+        return self.user_main.get_deposit_list()

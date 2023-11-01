@@ -9,7 +9,7 @@ from bot.utils import send_email, truncate_float
 
 class TradingBot:
     def __init__(
-        self, user_id, email, exchange_name, credentials: dict, limit, db_url
+        self, user_id, email, exchange_name, credentials: dict, limit, engine
     ) -> None:
         self.user_id = user_id
         self.email = email
@@ -17,7 +17,7 @@ class TradingBot:
         self.credentials = credentials
         self.limit = limit
         self.exchange = getattr(exchanges, exchange_name)(**credentials)
-        self.engine = create_engine(db_url.replace("postgres://", "postgresql://"))
+        self.engine = engine
 
     def check_api_active(self):
         return self.exchange.is_spot_trading_enabled()

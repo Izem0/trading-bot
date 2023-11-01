@@ -29,8 +29,8 @@ MIN_BALANCE = 50
 DEBUG = False
 
 
-def run_bot(user_id, email, exchange_name, credentials, limit, db_url):
-    bot = TradingBot(user_id, email, exchange_name, credentials, limit, db_url)
+def run_bot(user_id, email, exchange_name, credentials, limit, engine):
+    bot = TradingBot(user_id, email, exchange_name, credentials, limit, engine)
 
     if not bot.check_api_active():
         LOG.warning(f"{exchange_name} - {email=} API is not active.")
@@ -201,7 +201,7 @@ def main():
                 ),
                 exchange_name=row["exchange_name"],
                 limit=99999,
-                db_url=DB_URL,
+                engine=ENGINE,
             )
     else:
         with ThreadPoolExecutor() as executor:
@@ -215,7 +215,7 @@ def main():
                     ),
                     exchange_name=row["exchange_name"],
                     limit=99999,
-                    db_url=DB_URL,
+                    engine=ENGINE,
                 )
 
 
