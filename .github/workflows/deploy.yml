@@ -53,6 +53,7 @@ jobs:
         run: |
           ssh -i ~/.ssh/private_key ${USER}@${EC2_HOST} <<'EOF'
           cd ~/python-scripts/trading-bot/
+          git reset --hard HEAD
           git pull origin master
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
