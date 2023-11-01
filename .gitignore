@@ -1,5 +1,6 @@
 __pycache__/
 .env
+logs/
 order_response_examples/
 routine_compute_balance.py
 routine_update_fiat_transfer_table.py

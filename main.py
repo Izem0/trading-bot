@@ -2,6 +2,7 @@ import os
 import math
 import json
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 
 import pandas as pd
 from sqlalchemy import create_engine
@@ -21,7 +22,8 @@ infisical = InfisicalClient(token=os.getenv("INFISICAL_TOKEN"))
 infisical.get_all_secrets(attach_to_os_environ=True)
 
 # constants
-LOG = setup_logger()
+BASE_DIR = Path(__file__).parent
+LOG = setup_logger(filename=BASE_DIR / "logs/trading_bot.log")
 DB_URL = os.getenv("TRADING_BOT_DB")
 ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY")
 ENGINE = create_engine(DB_URL.replace("postgres://", "postgresql://"))

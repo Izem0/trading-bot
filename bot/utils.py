@@ -6,6 +6,8 @@ import logging
 import sys
 from email.message import EmailMessage
 from datetime import datetime, timezone
+from logging.handlers import RotatingFileHandler
+from pathlib import Path
 
 from cryptography.fernet import Fernet
 
@@ -80,31 +82,46 @@ def send_email(
 
 def setup_logger(
     name: str = __name__,
-    datefmt: str = "%Y-%m-%d %H:%M:%S%z",
-    handlers: list = None,
-    level="INFO",
-):
-    """Generate a logger"""
-    _nameToLevel = {
-        "CRITICAL": logging.CRITICAL,
-        "FATAL": logging.FATAL,
-        "ERROR": logging.ERROR,
-        "WARNING": logging.WARNING,
-        "INFO": logging.INFO,
-        "DEBUG": logging.DEBUG,
-    }
+    level: int = logging.INFO,
+    format: str = "[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s",
+    handlers: list[logging.handlers] | None = None,
+    filename: str | None = None,
+) -> logging.Logger:
+    """
+    Create a custom logger with specified parameters.
 
-    if not handlers:
-        handlers = [logging.StreamHandler(sys.stdout)]  # print to console
+    :param name: Logger name.
+    :param level: Logging level (e.g., logging.DEBUG, logging.INFO, logging.ERROR).
+    :param format: Format for log messages.
+    :param handlers: List of logging handlers (e.g., FileHandler, StreamHandler).
+    :param filename: Name of the file for any FileHandler, RotatingFileHandler etc. Can be a path ex. /path/to/app.log
+    :return: Custom logger instance.
+    """
+    if handlers and filename is not None:
+        raise KeyError("Cannot specify both a list of handlers and a filename.")
 
-    logging.basicConfig(
-        format="%(asctime)s | %(filename)s:%(lineno)d | %(levelname)s | %(message)s",
-        datefmt=datefmt,
-        level=_nameToLevel.get(level),
-        handlers=handlers,
-    )
+    # create dir if not exist
+    filename_path = Path(filename)
+    filename_path.parent.mkdir(parents=True, exist_ok=True)
 
+    # create a logger with the specified name
     logger = logging.getLogger(name)
+    logger.setLevel(level)
+
+    # create a formatter with the given format
+    formatter = logging.Formatter(format)
+
+    # set up default handlers if none given
+    if not handlers:
+        handlers = [
+            logging.StreamHandler(sys.stdout),
+            RotatingFileHandler(filename, maxBytes=50 * 1024, backupCount=7),
+        ]
+
+    # add the specified handlers to the logger
+    for handler in handlers:
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
 
     return logger
 
