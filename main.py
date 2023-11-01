@@ -1,5 +1,6 @@
 import os
 import math
+import json
 from concurrent.futures import ThreadPoolExecutor
 
 import pandas as pd
@@ -9,7 +10,7 @@ from json2html import json2html
 from dotenv import load_dotenv
 
 from bot.bot import TradingBot
-from bot.utils import setup_logger, send_email
+from bot.utils import setup_logger, send_email, decrypt_data
 
 load_dotenv()
 
@@ -22,6 +23,7 @@ infisical.get_all_secrets(attach_to_os_environ=True)
 # constants
 LOG = setup_logger()
 DB_URL = os.getenv("TRADING_BOT_DB")
+ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY")
 ENGINE = create_engine(DB_URL.replace("postgres://", "postgresql://"))
 MIN_BALANCE = 50
 DEBUG = False
@@ -78,6 +80,9 @@ def run_bot(user_id, email, exchange_name, credentials, limit, db_url):
                 f"{email=} - {exchange_name=} - {market=} - {signal * weight=} ~= {rel_size=:.2f} -> DO NOTHING!"
             )
             continue
+
+        if DEBUG:
+            return
 
         # init order
         order = None
@@ -191,7 +196,9 @@ def main():
             run_bot(
                 user_id=row["user_id"],
                 email=row["email"],
-                credentials=row["credentials"],
+                credentials=json.loads(
+                    decrypt_data(ENCRYPTION_KEY, row["credentials"])
+                ),
                 exchange_name=row["exchange_name"],
                 limit=99999,
                 db_url=DB_URL,
@@ -203,7 +210,9 @@ def main():
                     run_bot,
                     user_id=row["user_id"],
                     email=row["email"],
-                    credentials=row["credentials"],
+                    credentials=json.loads(
+                        decrypt_data(ENCRYPTION_KEY, row["credentials"])
+                    ),
                     exchange_name=row["exchange_name"],
                     limit=99999,
                     db_url=DB_URL,

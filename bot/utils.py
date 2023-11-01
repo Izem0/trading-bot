@@ -7,6 +7,8 @@ import sys
 from email.message import EmailMessage
 from datetime import datetime, timezone
 
+from cryptography.fernet import Fernet
+
 
 def truncate_float(raw_qty: float, precision: float) -> float:
     """Truncate float with respect to precision.
@@ -113,3 +115,15 @@ def camelcase_to_snakecase(string: str) -> str:
 
 def validate_market(market: str) -> bool:
     return re.match("^\w+USDT$", market, flags=re.IGNORECASE)
+
+
+def encrypt_data(encryption_key: str, data: str) -> str:
+    f = Fernet(encryption_key.encode())
+    encrypted_data = f.encrypt(data.encode())
+    return encrypted_data.decode()
+
+
+def decrypt_data(encryption_key: str, data: str) -> str:
+    f = Fernet(encryption_key.encode())
+    decrypted_data = f.decrypt(data.encode())
+    return decrypted_data.decode()
