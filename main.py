@@ -26,7 +26,7 @@ DB_URL = os.getenv("TRADING_BOT_DB")
 ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY")
 ENGINE = create_engine(DB_URL.replace("postgres://", "postgresql://"))
 MIN_BALANCE = 50
-DEBUG = False
+DEBUG = os.getenv("DEBUG")
 
 
 def run_bot(user_id, email, exchange_name, credentials, limit, engine):
