@@ -81,9 +81,6 @@ def run_bot(user_id, email, exchange_name, credentials, limit, engine):
             )
             continue
 
-        if DEBUG:
-            return
-
         # init order
         order = None
 
@@ -94,6 +91,10 @@ def run_bot(user_id, email, exchange_name, credentials, limit, engine):
             LOG.info(
                 f"{email=} - {exchange_name} - {market=} - {signal=} * {weight=} = {signal * weight} > {rel_size=:.2f} -> BUY"
             )
+
+            if DEBUG:
+                LOG.info(f"{DEBUG=}, not executing BUY order.")
+                continue
 
             # get quantity to buy
             qty_to_buy_trunc = bot.get_quantity_to_buy(
@@ -132,6 +133,10 @@ def run_bot(user_id, email, exchange_name, credentials, limit, engine):
             LOG.info(
                 f"{email=} - {exchange_name} - {market=} - {signal=} * {weight=} = {signal * weight} > {rel_size=:.2f} -> SELL"
             )
+
+            if DEBUG:
+                LOG.info(f"{DEBUG=}, not executing SELL order.")
+                continue
 
             # get qty to sell
             qty_to_sell_trunc = bot.get_quantity_to_sell(
