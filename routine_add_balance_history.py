@@ -1,13 +1,15 @@
 """Get balance data (to run every day at 00:00:05)"""
 
 import os
+from pathlib import Path
+
 import pandas as pd
 from sqlalchemy import create_engine, types
 from dotenv import load_dotenv
 from infisical import InfisicalClient
 
 import exchanges
-from bot.utils import send_email, setup_logger
+from bot.utils import setup_logger
 
 load_dotenv()
 
@@ -18,8 +20,9 @@ infisical = InfisicalClient(token=os.getenv("INFISICAL_TOKEN"))
 infisical.get_all_secrets(attach_to_os_environ=True)
 
 # CONSTANTS
+BASE_DIR = Path(__file__).parent
+LOG = setup_logger(filename=BASE_DIR / "logs/trading_bot.log")
 DB_URL = os.getenv("TRADING_BOT_DB")
-LOGGER = setup_logger()
 
 
 class Database:
@@ -35,7 +38,7 @@ class Database:
 
 
 def main():
-    LOGGER.info("Script is running")
+    LOG.info("Script is running")
 
     # init db connection
     db = Database(url=DB_URL.replace("postgres://", "postgresql://"))
@@ -51,7 +54,7 @@ def main():
     )
 
     for _, row in connections.iterrows():
-        LOGGER.info(f"Fetching balance for {row['email']} on {row['exchange']}")
+        LOG.info(f"Fetching balance for {row['email']} on {row['exchange']}")
 
         exchange = getattr(exchanges, row["exchange"])(
             **row["credentials"]
@@ -75,10 +78,10 @@ def main():
         r = db.post(balance_history, "balance_history", dtype={"assets": types.JSON})
 
         if r == 0:
-            LOGGER.info("No data added to balance")
+            LOG.info("No data added to balance")
             # send_email(subject='Error adding data to balance')
         else:
-            LOGGER.info("Balance data added to database")
+            LOG.info("Balance data added to database")
 
 
 if __name__ == "__main__":
