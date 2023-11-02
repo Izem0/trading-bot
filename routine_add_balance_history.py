@@ -1,6 +1,7 @@
 """Get balance data (to run every day at 00:00:05)"""
 
 import os
+import json
 from pathlib import Path
 
 import pandas as pd
@@ -9,7 +10,7 @@ from dotenv import load_dotenv
 from infisical import InfisicalClient
 
 import exchanges
-from bot.utils import setup_logger
+from bot.utils import setup_logger, decrypt_data
 
 load_dotenv()
 
@@ -23,6 +24,7 @@ infisical.get_all_secrets(attach_to_os_environ=True)
 BASE_DIR = Path(__file__).parent
 LOG = setup_logger(filename=BASE_DIR / "logs/trading_bot.log")
 DB_URL = os.getenv("TRADING_BOT_DB")
+ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY")
 
 
 class Database:
@@ -56,9 +58,8 @@ def main():
     for _, row in connections.iterrows():
         LOG.info(f"Fetching balance for {row['email']} on {row['exchange']}")
 
-        exchange = getattr(exchanges, row["exchange"])(
-            **row["credentials"]
-        )
+        creds = json.loads(decrypt_data(ENCRYPTION_KEY, row["credentials"]))
+        exchange = getattr(exchanges, row["exchange"])(**creds)
 
         # get account snapshots
         balance_usd = exchange.get_balance_in_usd()
