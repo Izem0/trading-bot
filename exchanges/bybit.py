@@ -223,6 +223,8 @@ class Bybit(Exchange):
         order_f["qty"] = float(order.get("cumExecQty"))
         order_f["quote_quantity"] = float(order.get("cumExecValue"))
         order_f["fee"] = float(order.get("cumExecFee"))
+        if order_f["side"] == "BUY" and order_f["type"] == "MARKET":
+            order_f["fee"] *= order_f["price"]
         order_f["original_data"] = order
         return order_f
 
