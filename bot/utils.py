@@ -3,11 +3,11 @@ import smtplib
 import math
 import re
 import logging
-import sys
+import logging.config
+import yaml
+import warnings
 from email.message import EmailMessage
 from datetime import datetime, timezone
-from logging.handlers import RotatingFileHandler
-from pathlib import Path
 
 from cryptography.fernet import Fernet
 
@@ -81,49 +81,28 @@ def send_email(
 
 
 def setup_logger(
-    name: str = __name__,
-    level: int = logging.INFO,
-    format: str = "[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s",
-    handlers: list[logging.handlers] | None = None,
-    filename: str | None = None,
+    logger_name: str, log_config_file: str, log_file: str = "file1.log"
 ) -> logging.Logger:
-    """
-    Create a custom logger with specified parameters.
+    if not log_config_file:
+        raise ValueError("Please provide a log configuration file path.")
+    
+    with open(log_config_file, "r") as f:
+        config = yaml.safe_load(f.read())
 
-    :param name: Logger name.
-    :param level: Logging level (e.g., logging.DEBUG, logging.INFO, logging.ERROR).
-    :param format: Format for log messages.
-    :param handlers: List of logging handlers (e.g., FileHandler, StreamHandler).
-    :param filename: Name of the file for any FileHandler, RotatingFileHandler etc. Can be a path ex. /path/to/app.log
-    :return: Custom logger instance.
-    """
-    if handlers and filename is not None:
-        raise KeyError("Cannot specify both a list of handlers and a filename.")
+        # set the filename for the RotatingFileHandler
+        config["handlers"]["file"]["filename"] = log_file
 
-    # create dir if not exist
-    filename_path = Path(filename)
-    filename_path.parent.mkdir(parents=True, exist_ok=True)
+        # apply logging config to logging
+        logging.config.dictConfig(config)
 
-    # create a logger with the specified name
-    logger = logging.getLogger(name)
-    logger.setLevel(level)
+        if logger_name not in config["loggers"]:
+            warnings.warn(
+                "Beware! The logger name you provided does not match any logger defined in the logging config file. "
+                f"({list(config['loggers'].keys())}). Using the root logger."
+            )
+            logger_name = "root"
 
-    # create a formatter with the given format
-    formatter = logging.Formatter(format)
-
-    # set up default handlers if none given
-    if not handlers:
-        handlers = [
-            logging.StreamHandler(sys.stdout),
-            RotatingFileHandler(filename, maxBytes=50 * 1024, backupCount=7),
-        ]
-
-    # add the specified handlers to the logger
-    for handler in handlers:
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
-
-    return logger
+        return logging.getLogger(logger_name)
 
 
 def camelcase_to_snakecase(string: str) -> str:

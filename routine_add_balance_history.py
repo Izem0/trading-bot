@@ -22,9 +22,16 @@ infisical.get_all_secrets(attach_to_os_environ=True)
 
 # CONSTANTS
 BASE_DIR = Path(__file__).parent
-LOG = setup_logger(filename=BASE_DIR / "logs/trading_bot.log")
+LOG_DIR = BASE_DIR / "logs"
+LOG_DIR.mkdir(exist_ok=True)
+LOG = setup_logger(
+    logger_name="routines",
+    log_config_file=BASE_DIR / "logging.yaml",
+    log_file=LOG_DIR / "trading_bot.log",
+)
 DB_URL = os.getenv("TRADING_BOT_DB")
 ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY")
+DEBUG = os.getenv("DEBUG")
 
 
 class Database:
@@ -75,6 +82,10 @@ def main():
             }
         )
 
+        if DEBUG:
+            LOG.debug("Debug mode, do not add balance to DB.")
+            continue
+        
         # post data to DB
         r = db.post(balance_history, "balance_history", dtype={"assets": types.JSON})
 

@@ -26,7 +26,11 @@ infisical.get_all_secrets(attach_to_os_environ=True)
 BASE_DIR = Path(__file__).parent
 LOG_DIR = BASE_DIR / "logs"
 LOG_DIR.mkdir(exist_ok=True)
-LOG = setup_logger(filename=LOG_DIR / "trading_bot.log")
+LOG = setup_logger(
+    logger_name="bot",
+    log_config_file=BASE_DIR / "logging.yaml",
+    log_file=LOG_DIR / "trading_bot.log",
+)
 DB_URL = os.getenv("TRADING_BOT_DB")
 ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY")
 ENGINE = create_engine(DB_URL.replace("postgres://", "postgresql://"))
@@ -98,7 +102,7 @@ def run_bot(user_id, email, exchange_name, credentials, limit, engine):
             )
 
             if DEBUG:
-                LOG.info(f"{DEBUG=}, not executing BUY order.")
+                LOG.debug(f"Debug mode, not executing BUY order.")
                 continue
 
             # get quantity to buy
@@ -123,14 +127,18 @@ def run_bot(user_id, email, exchange_name, credentials, limit, engine):
             # try placing order
             try:
                 order = bot.place_order(market, side="BUY", qty=qty_to_buy_trunc)
-                LOG.info(f"{email=} - {exchange_name} - {market=} - Order successfully placed!")
+                LOG.info(
+                    f"{email=} - {exchange_name} - {market=} - Order successfully placed!"
+                )
             except:
                 traceback_str = traceback.format_exc()
                 send_email(
                     subject=f"Error placing BUY order for {market} for user {email}",
                     body=traceback_str,
                 )
-                LOG.exception(f"{email=} - {exchange_name} - {market=} - Error placing BUY order.")
+                LOG.exception(
+                    f"{email=} - {exchange_name} - {market=} - Error placing BUY order."
+                )
 
         ############
         ### SELL ###
@@ -141,7 +149,7 @@ def run_bot(user_id, email, exchange_name, credentials, limit, engine):
             )
 
             if DEBUG:
-                LOG.info(f"{DEBUG=}, not executing SELL order.")
+                LOG.debug(f"Debug mode, not executing SELL order.")
                 continue
 
             # get qty to sell
@@ -156,14 +164,18 @@ def run_bot(user_id, email, exchange_name, credentials, limit, engine):
             # try placing sell order
             try:
                 order = bot.place_order(market, side="SELL", qty=qty_to_sell_trunc)
-                LOG.info(f"{email=} - {exchange_name} - {market=} - Order successfully placed!")
+                LOG.info(
+                    f"{email=} - {exchange_name} - {market=} - Order successfully placed!"
+                )
             except:
                 traceback_str = traceback.format_exc()
                 send_email(
                     subject=f"Error placing SELL order for {market} for user {email}",
                     body=traceback_str,
                 )
-                LOG.exception(f"{email=} - {exchange_name} - {market=} - Error placing SELL order.")
+                LOG.exception(
+                    f"{email=} - {exchange_name} - {market=} - Error placing SELL order."
+                )
 
         if order:
             # add info to original order
@@ -172,7 +184,9 @@ def run_bot(user_id, email, exchange_name, credentials, limit, engine):
 
             # add order to DB
             bot.write_order_to_db(order)
-            LOG.info(f"{email=} - {exchange_name} - {market=} - Order added to database!")
+            LOG.info(
+                f"{email=} - {exchange_name} - {market=} - Order added to database!"
+            )
 
             # send email
             order_data = order["original_data"]
