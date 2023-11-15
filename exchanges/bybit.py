@@ -278,3 +278,58 @@ class Bybit(Exchange):
             category="spot", orderId=order_id, symbol=order["symbol"]
         )
         return r["result"]
+
+    def _get_internal_transfer_records(self, **kwargs):
+        r = self.client.get_internal_transfer_records(**kwargs)
+        transfers = pd.DataFrame(r["result"]["list"])
+        transfers["timestamp"] = pd.to_datetime(
+            transfers["timestamp"], unit="ms", utc=True
+        )
+        transfers = transfers.astype({"amount": float})
+        transfers.sort_values("timestamp", ignore_index=True, inplace=True)
+        return transfers
+
+    def _get_universal_transfer_records(self, **kwargs):
+        r = self.client.get_universal_transfer_records(**kwargs)
+        transfers = pd.DataFrame(r["result"]["list"])
+        transfers["timestamp"] = pd.to_datetime(
+            transfers["timestamp"], unit="ms", utc=True
+        )
+        transfers = transfers.astype(
+            {"amount": float, "fromMemberId": int, "toMemberId": int}
+        )
+        transfers.sort_values("timestamp", ignore_index=True, inplace=True)
+        return transfers
+
+    def get_net_transfers(self, **kwargs):
+        """Use methods _get_universal_transfer_records and _get_internal_transfer_records to get
+        transfers (in and out) of the UNIFIED trading sub-account"""
+        # get internal & universal transfers
+        internal = self._get_internal_transfer_records(**kwargs)
+        universal = self._get_universal_transfer_records(**kwargs)
+
+        # adapt internal data to match universal data
+        user_id = self.get_api_key_information().get("userID")
+        internal["fromMemberId"] = user_id
+        internal["toMemberId"] = user_id
+
+        # join the two dataframes
+        transfers = pd.concat([internal, universal], ignore_index=True)
+        # compute net amounts
+        transfers["net_amount"] = np.where(
+            (transfers["toMemberId"] == user_id)
+            & (transfers["toAccountType"] == "UNIFIED"),
+            transfers["amount"],
+            np.nan,
+        )
+        transfers["net_amount"] = np.where(
+            (transfers["fromMemberId"] == user_id)
+            & (transfers["fromAccountType"] == "UNIFIED"),
+            -transfers["amount"],
+            transfers["net_amount"],
+        )
+        # clean a bit
+        transfers.sort_values(["timestamp"], ignore_index=True, inplace=True)
+        transfers = transfers[["timestamp", "status", "coin", "net_amount"]]
+        transfers.rename(columns={"timestamp": "date"}, inplace=True)
+        return transfers
