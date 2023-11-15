@@ -3,7 +3,9 @@ import time
 import warnings
 from datetime import datetime
 
+import numpy as np
 import pandas as pd
+import backoff
 from pybit.unified_trading import HTTP
 
 from exchanges.base import Exchange
@@ -204,7 +206,7 @@ class Bybit(Exchange):
     def _get_order_details(self, order_id: str, **kwargs) -> dict:
         """Get order details if exists."""
         r = self.client.get_order_history(category="spot", orderId=order_id, **kwargs)
-        ls = [x for x in r["result"]["list"] if x["orderId"] == order_id]
+        ls = [x for x in r["result"]["list"] if x.get("orderId") == order_id]
         if not ls:
             return {}
         return ls[0]
@@ -212,15 +214,15 @@ class Bybit(Exchange):
     def _format_order_details(self, order: dict) -> dict:
         """Format order info so it matches database columns"""
         order_f = {}
-        order_f["exchange_order_id"] = order["orderId"]
-        order_f["datetime"] = unix_to_dt(int(order["createdTime"]))
-        order_f["market"] = order["symbol"]
-        order_f["side"] = order["side"].upper()
-        order_f["type"] = order["orderType"].upper()
-        order_f["price"] = float(order["avgPrice"])
-        order_f["qty"] = float(order["cumExecQty"])
-        order_f["quote_quantity"] = float(order["cumExecValue"])
-        order_f["fee"] = float(order["cumExecFee"])
+        order_f["exchange_order_id"] = order.get("orderId")
+        order_f["datetime"] = unix_to_dt(int(order.get("createdTime")))
+        order_f["market"] = order.get("symbol")
+        order_f["side"] = order.get("side").upper()
+        order_f["type"] = order.get("orderType").upper()
+        order_f["price"] = float(order.get("avgPrice"))
+        order_f["qty"] = float(order.get("cumExecQty"))
+        order_f["quote_quantity"] = float(order.get("cumExecValue"))
+        order_f["fee"] = float(order.get("cumExecFee"))
         order_f["original_data"] = order
         return order_f
 
@@ -255,8 +257,13 @@ class Bybit(Exchange):
             price=price,
             timeInForce=time_in_force,
         )
-        time.sleep(5)  # wait a bit to avoid empty order details
-        order = self._get_order_details(order_id=r["result"]["orderId"])
+        time.sleep(5)
+        order_id = r["result"].get("orderId")
+        if not order_id:
+            raise ValueError(
+                f"Can't get the order id of the successfully placed order. \n{r=}"
+            )
+        order = self._get_order_details(order_id=order_id)
         order_formatted = self._format_order_details(order)
         return order_formatted
 
@@ -267,5 +274,7 @@ class Bybit(Exchange):
     def cancel_order(self, order_id: str) -> dict:
         """Cancel open order"""
         order = self._get_order_details(order_id=order_id)
-        r = self.client.cancel_order(category="spot", orderId=order_id, symbol=order["symbol"])
+        r = self.client.cancel_order(
+            category="spot", orderId=order_id, symbol=order["symbol"]
+        )
         return r["result"]
