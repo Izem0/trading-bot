@@ -1,6 +1,7 @@
 import os
 import math
 import json
+import traceback
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -70,7 +71,7 @@ def run_bot(user_id, email, exchange_name, credentials, limit, engine):
 
         if rel_size > 1:
             LOG.warning(
-                f"{exchange_name} Wrong relative size for {email=} ({rel_size=:.2f}!"
+                f"Wrong relative size for {email=} {exchange_name} ({rel_size=:.2f}!"
             )
             send_email(
                 subject=f"{exchange_name} - Wrong relative size for {email=}!",
@@ -114,7 +115,7 @@ def run_bot(user_id, email, exchange_name, credentials, limit, engine):
             qty_to_buy_usd = qty_to_buy_trunc * bot.get_ticker_price(market)
             if free_usdt < qty_to_buy_usd:
                 send_email(
-                    subject=f"{email=} - Can't BUY {qty_to_buy_usd:.2f}$ worth of {market}, "
+                    subject=f"{email=} - {exchange_name} - Can't BUY {qty_to_buy_usd:.2f}$ worth of {market}, "
                     f"user has only {free_usdt:.2f} USDT in account."
                 )
                 continue
@@ -122,13 +123,14 @@ def run_bot(user_id, email, exchange_name, credentials, limit, engine):
             # try placing order
             try:
                 order = bot.place_order(market, side="BUY", qty=qty_to_buy_trunc)
-                LOG.info("Order successfully placed!")
-            except Exception as e:
+                LOG.info(f"{email=} - {exchange_name} - {market=} - Order successfully placed!")
+            except:
+                traceback_str = traceback.format_exc()
                 send_email(
                     subject=f"Error placing BUY order for {market} for user {email}",
-                    body=json2html.convert(e),
+                    body=traceback_str,
                 )
-                LOG.info(f"Error placing BUY order for {market} for user {email}. {e=}")
+                LOG.exception(f"{email=} - {exchange_name} - {market=} - Error placing BUY order.")
 
         ############
         ### SELL ###
@@ -154,15 +156,14 @@ def run_bot(user_id, email, exchange_name, credentials, limit, engine):
             # try placing sell order
             try:
                 order = bot.place_order(market, side="SELL", qty=qty_to_sell_trunc)
-                LOG.info("Order successfully placed!")
-            except Exception as e:
+                LOG.info(f"{email=} - {exchange_name} - {market=} - Order successfully placed!")
+            except:
+                traceback_str = traceback.format_exc()
                 send_email(
-                    subject=f"Error placing SELL order for user {email}",
-                    body=json2html.convert(e),
+                    subject=f"Error placing SELL order for {market} for user {email}",
+                    body=traceback_str,
                 )
-                LOG.info(
-                    f"Problem with SELL order for {market} for user {email} (error: {e})"
-                )
+                LOG.exception(f"{email=} - {exchange_name} - {market=} - Error placing SELL order.")
 
         if order:
             # add info to original order
@@ -171,7 +172,7 @@ def run_bot(user_id, email, exchange_name, credentials, limit, engine):
 
             # add order to DB
             bot.write_order_to_db(order)
-            LOG.info("Order added to database!")
+            LOG.info(f"{email=} - {exchange_name} - {market=} - Order added to database!")
 
             # send email
             order_data = order["original_data"]
@@ -179,7 +180,7 @@ def run_bot(user_id, email, exchange_name, credentials, limit, engine):
             order.update({"original_data": order_data})
             subject = f"{order['side']} {order['type']} order executed for {market} on {exchange_name} at {order['datetime']:%Y-%m-%d %H:%M:%S} UTC"
             send_email(receipient=email, subject=subject, html=json2html.convert(order))
-            LOG.info(f"Mail sent to {email}!")
+            LOG.info(f"{email=} - {exchange_name} - Mail sent to {email}!")
 
 
 def main():
