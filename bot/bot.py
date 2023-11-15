@@ -116,7 +116,10 @@ class TradingBot:
     def place_order(self, market, side, qty):
         order = self.exchange.place_order(market, side=side, qty=qty)
         return order
-
+    
+    def get_order_details(self, order_id):
+        return self.exchange._get_order_details(order_id)
+    
     def write_order_to_db(self, order):
         order_df = pd.DataFrame(
             columns=[
