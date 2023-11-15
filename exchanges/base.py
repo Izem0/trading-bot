@@ -3,10 +3,8 @@ from datetime import datetime
 
 
 class Exchange(ABC):
-    def __init__(self, api_key, api_secret, subaccount: str = None) -> None:
-        self.api_key = api_key
-        self.api_secret = api_secret
-        self.subaccount = subaccount
+    def __init__(self):
+        pass
 
     ###########
     # ACCOUNT #
