@@ -3,7 +3,7 @@ name: Deploy to EC2 using ssh
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   deploy:
@@ -54,7 +54,7 @@ jobs:
           ssh -i ~/.ssh/private_key ${USER}@${EC2_HOST} <<'EOF'
           cd ~/python-scripts/trading-bot/
           git reset --hard HEAD
-          git pull origin master
+          git pull origin main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           EC2_HOST: ${{ secrets.EC2_HOST }}
