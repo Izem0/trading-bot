@@ -215,7 +215,11 @@ class Bybit(Exchange):
         """Format order info so it matches database columns"""
         order_f = {}
         order_f["exchange_order_id"] = order.get("orderId")
-        order_f["datetime"] = unix_to_dt(int(order.get("createdTime")))
+        created_time = order.get("createdTime")
+        if not created_time:
+            order_f["datetime"] = None
+        else:
+            order_f["datetime"] = unix_to_dt(int(order.get("createdTime")))
         order_f["market"] = order.get("symbol")
         order_f["side"] = order.get("side").upper()
         order_f["type"] = order.get("orderType").upper()
