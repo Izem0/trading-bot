@@ -263,7 +263,7 @@ class Bybit(Exchange):
             price=price,
             timeInForce=time_in_force,
         )
-        time.sleep(5)
+        time.sleep(15)
         order_id = r["result"].get("orderId")
         if not order_id:
             raise ValueError(
