@@ -9,6 +9,8 @@ import warnings
 from email.message import EmailMessage
 from datetime import datetime, timezone
 
+import requests
+import pandas as pd
 from cryptography.fernet import Fernet
 
 
@@ -85,7 +87,7 @@ def setup_logger(
 ) -> logging.Logger:
     if not log_config_file:
         raise ValueError("Please provide a log configuration file path.")
-    
+
     with open(log_config_file, "r") as f:
         config = yaml.safe_load(f.read())
 
@@ -123,3 +125,28 @@ def decrypt_data(encryption_key: str, data: str) -> str:
     f = Fernet(encryption_key.encode())
     decrypted_data = f.decrypt(data.encode())
     return decrypted_data.decode()
+
+
+def get_binance_ohlcv(
+    market: str,
+    timeframe: str = "1d",
+    start_date: datetime = None,
+    end_date: datetime = None,
+    limit: int = None,
+) -> pd.DataFrame:
+    params = {
+        "symbol": market,
+        "interval": timeframe,
+        "startTime": date_to_unix(start_date),
+        "endTime": date_to_unix(end_date),
+        "limit": limit,
+    }
+    r = requests.get("https://api.binance.com/api/v3/klines", params=params)
+    df = pd.DataFrame(r.json())
+    df = df[[0, 1, 2, 3, 4, 5]]
+    df.columns = ["date", "open", "high", "low", "close", "volume"]
+    df["date"] = pd.to_datetime(df["date"], utc=True, unit="ms")
+    df = df.astype(
+        {"open": float, "high": float, "low": float, "close": float, "volume": float}
+    )
+    return df

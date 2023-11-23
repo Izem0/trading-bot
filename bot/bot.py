@@ -4,7 +4,7 @@ from sqlalchemy import create_engine, types
 
 import strategies
 import exchanges
-from bot.utils import send_email, truncate_float
+from bot.utils import send_email, truncate_float, get_binance_ohlcv
 
 
 class TradingBot:
@@ -68,7 +68,7 @@ class TradingBot:
         return portfolio_configs
 
     def get_signal(self, strategy, market) -> float | int:
-        ohlcv = self.exchange.get_ohlcv(market).set_index("date")
+        ohlcv = get_binance_ohlcv(market).set_index("date")
         full_signal = getattr(strategies, strategy)(ohlcv)
         return full_signal[-1]
 
