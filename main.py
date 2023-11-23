@@ -133,7 +133,7 @@ def run_bot(user_id, email, exchange_name, credentials, limit, engine):
             except:
                 traceback_str = traceback.format_exc()
                 send_email(
-                    subject=f"Error placing BUY order for {market} for user {email}",
+                    subject=f"{email=} - {exchange_name} - {market=} - Error placing BUY order.",
                     body=traceback_str,
                 )
                 LOG.exception(
@@ -170,7 +170,7 @@ def run_bot(user_id, email, exchange_name, credentials, limit, engine):
             except:
                 traceback_str = traceback.format_exc()
                 send_email(
-                    subject=f"Error placing SELL order for {market} for user {email}",
+                    subject=f"{email=} - {exchange_name} - {market=} - Error placing BUY order.",
                     body=traceback_str,
                 )
                 LOG.exception(
