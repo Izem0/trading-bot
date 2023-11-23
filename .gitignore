@@ -10,4 +10,5 @@ strategies.py
 sql/
 testing_script*.py
 tests/
+TODO.md
 venv/
