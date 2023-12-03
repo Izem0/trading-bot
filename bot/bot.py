@@ -86,6 +86,17 @@ class TradingBot:
         return relative_size
 
     def get_quantity_to_buy(self, base, market, pf_assets, weight, signal, limit=99999):
+        # check that user has enough usdt to cover expense
+        free_usdt = self.exchange.get_symbol_qty(symbol="USDT")
+        qty_to_buy_usd = qty_to_buy_trunc * self.exchange.get_ticker_price(market)
+        # if not enough money, use the rest of the money to buy
+        if free_usdt < qty_to_buy_usd:
+            target_qty = (
+                free_usdt
+            ) / self.exchange.get_ticker_price(market)
+            qty_to_buy_trunc = truncate_float(target_qty, precision=precision)
+            return qty_to_buy_trunc
+        
         portfolio_worth = self.get_portfolio_worth(pf_assets)
         target_qty = (
             min(limit, portfolio_worth) * weight * signal

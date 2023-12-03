@@ -114,15 +114,14 @@ def run_bot(user_id, email, exchange_name, credentials, limit, engine):
                 signal=signal,
             )
 
-            # check if user has enough quote asset (USDT) to buy this qty
+            # notify if user has not enough quote asset (USDT) to buy the target quantity
             free_usdt = bot.get_symbol_qty(symbol="USDT")
             qty_to_buy_usd = qty_to_buy_trunc * bot.get_ticker_price(market)
             if free_usdt < qty_to_buy_usd:
                 send_email(
                     subject=f"{email=} - {exchange_name} - Can't BUY {qty_to_buy_usd:.2f}$ worth of {market}, "
-                    f"user has only {free_usdt:.2f} USDT in account."
+                    f"user has only {free_usdt:.2f} USDT in account. Buying for {free_usdt} USDT worth of asset."
                 )
-                continue
 
             # try placing order
             try:
