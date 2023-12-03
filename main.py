@@ -102,7 +102,7 @@ def run_bot(user_id, email, exchange_name, credentials, limit, engine):
             )
 
             if DEBUG:
-                LOG.debug(f"Debug mode, not executing BUY order.")
+                LOG.info(f"Debug mode, not executing BUY order.")
                 continue
 
             # get quantity to buy
