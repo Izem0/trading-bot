@@ -85,7 +85,16 @@ class TradingBot:
         relative_size = symbol_worth / min(portfolio_worth, limit)
         return relative_size
 
-    def get_quantity_to_buy(self, base, market, pf_assets, weight, signal, limit=99999):
+    def get_quantity_to_buy(self, base, market, pf_assets, weight, signal, limit=99999):      
+        portfolio_worth = self.get_portfolio_worth(pf_assets)
+        target_qty = (
+            min(limit, portfolio_worth) * weight * signal
+        ) / self.exchange.get_ticker_price(market)
+        current_qty = self.exchange.get_symbol_qty(base)
+        raw_qty_to_buy = target_qty - current_qty
+        precision = self.exchange.get_ticker_precision(market)
+        qty_to_buy_trunc = truncate_float(raw_qty_to_buy, precision=precision)
+
         # check that user has enough usdt to cover expense
         free_usdt = self.exchange.get_symbol_qty(symbol="USDT")
         qty_to_buy_usd = qty_to_buy_trunc * self.exchange.get_ticker_price(market)
@@ -97,14 +106,6 @@ class TradingBot:
             qty_to_buy_trunc = truncate_float(target_qty, precision=precision)
             return qty_to_buy_trunc
         
-        portfolio_worth = self.get_portfolio_worth(pf_assets)
-        target_qty = (
-            min(limit, portfolio_worth) * weight * signal
-        ) / self.exchange.get_ticker_price(market)
-        current_qty = self.exchange.get_symbol_qty(base)
-        raw_qty_to_buy = target_qty - current_qty
-        precision = self.exchange.get_ticker_precision(market)
-        qty_to_buy_trunc = truncate_float(raw_qty_to_buy, precision=precision)
         return qty_to_buy_trunc
 
     def get_quantity_to_sell(self, base, market, pf_assets, weight, signal, limit=99999):
