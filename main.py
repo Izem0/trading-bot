@@ -127,7 +127,7 @@ def run_bot(user_id, email, exchange_name, credentials, limit, engine):
             try:
                 order = bot.place_order(market, side="BUY", qty=qty_to_buy_trunc)
                 LOG.info(
-                    f"{email=} - {exchange_name} - {market=} - Order successfully placed!"
+                    f"{email=} - {exchange_name=} - {market=} - Order successfully placed!"
                 )
             except:
                 traceback_str = traceback.format_exc()
@@ -164,7 +164,7 @@ def run_bot(user_id, email, exchange_name, credentials, limit, engine):
             try:
                 order = bot.place_order(market, side="SELL", qty=qty_to_sell_trunc)
                 LOG.info(
-                    f"{email=} - {exchange_name} - {market=} - Order successfully placed!"
+                    f"{email=} - {exchange_name=} - {market=} - Order successfully placed!"
                 )
             except:
                 traceback_str = traceback.format_exc()
