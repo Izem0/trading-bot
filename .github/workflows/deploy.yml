@@ -55,6 +55,7 @@ jobs:
           cd ~/python-scripts/trading-bot/
           git reset --hard HEAD
           git pull origin main
+          pip install -r requirements.txt
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           EC2_HOST: ${{ secrets.EC2_HOST }}
