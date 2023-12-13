@@ -84,7 +84,7 @@ def run_bot(user_id, email, exchange_name, credentials, limit, engine):
             continue
 
         # compare position with signal
-        if math.isclose(a=rel_size, b=signal * weight, abs_tol=0.1):
+        if math.isclose(a=rel_size, b=signal * weight, abs_tol=0.05):
             LOG.info(
                 f"{email=} - {exchange_name=} - {market=} - {signal * weight=} ~= {rel_size=:.2f} -> DO NOTHING!"
             )
