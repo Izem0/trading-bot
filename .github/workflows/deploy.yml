@@ -31,6 +31,7 @@ jobs:
       - name: Upload .env to EC2
         run: |
           echo "INFISICAL_TOKEN=${INFISICAL_TOKEN}" > .env
+          echo "DEBUG=0" >> .env
           scp -i ~/.ssh/private_key .env ${USER}@${EC2_HOST}:${WORKDIR}
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
