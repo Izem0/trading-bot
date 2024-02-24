@@ -38,7 +38,7 @@ MIN_BALANCE = 50
 DEBUG = bool(int(os.getenv("DEBUG")))
 
 
-def run_bot(user_id, email, exchange_name, credentials, limit, engine):
+def run_bot(user_id, email, exchange_name, credentials, limit, order_notification, engine):
     bot = TradingBot(user_id, email, exchange_name, credentials, limit, engine)
 
     if not bot.check_api_active():
@@ -188,12 +188,13 @@ def run_bot(user_id, email, exchange_name, credentials, limit, engine):
             )
 
             # send email
-            order_data = order["original_data"]
-            order.pop("original_data")
-            order.update({"original_data": order_data})
-            subject = f"{order['side']} {order['type']} order executed for {market} on {exchange_name} at {order['datetime']:%Y-%m-%d %H:%M:%S} UTC"
-            send_email(receipient=email, subject=subject, html=json2html.convert(order))
-            LOG.info(f"{email=} - {exchange_name} - Mail sent to {email}!")
+            if order_notification:
+                order_data = order["original_data"]
+                order.pop("original_data")
+                order.update({"original_data": order_data})
+                subject = f"{order['side']} {order['type']} order executed for {market} on {exchange_name} at {order['datetime']:%Y-%m-%d %H:%M:%S} UTC"
+                send_email(receipient=email, subject=subject, html=json2html.convert(order))
+                LOG.info(f"{email=} - {exchange_name} - Mail sent to {email}!")
 
 
 def main():
@@ -205,11 +206,14 @@ def main():
         , credentials
         , e.name as exchange_name
         , active
+        , p.order_notification as order_notification
         from portfolios p
         join account_connections ac on p.account_connection_id = ac.id
         join users u on ac.user_id = u.id
         join exchanges e on ac.exchange_id = e.id
-        where active = true;
+        -- where active = true
+        where e.name = 'Kucoin'
+        ;
     """,
         con=ENGINE,
     )
@@ -224,6 +228,7 @@ def main():
                 ),
                 exchange_name=row["exchange_name"],
                 limit=99999,
+                order_notification=row["order_notification"],
                 engine=ENGINE,
             )
     else:
