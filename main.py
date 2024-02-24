@@ -211,8 +211,7 @@ def main():
         join account_connections ac on p.account_connection_id = ac.id
         join users u on ac.user_id = u.id
         join exchanges e on ac.exchange_id = e.id
-        -- where active = true
-        where e.name = 'Kucoin'
+        where active = true
         ;
     """,
         con=ENGINE,
