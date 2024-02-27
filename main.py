@@ -98,7 +98,7 @@ def run_bot(user_id, email, exchange_name, credentials, limit, order_notificatio
         ############
         if signal * weight > rel_size:
             LOG.info(
-                f"{email=} - {exchange_name} - {market=} - {signal=} * {weight=} = {signal * weight} > {rel_size=:.2f} -> BUY"
+                f"{email=} - {exchange_name=} - {market=} - {signal=} * {weight=} = {signal * weight} > {rel_size=:.2f} -> BUY"
             )
 
             if DEBUG:
@@ -119,7 +119,7 @@ def run_bot(user_id, email, exchange_name, credentials, limit, order_notificatio
             qty_to_buy_usd = qty_to_buy_trunc * bot.get_ticker_price(market)
             if free_usdt < qty_to_buy_usd:
                 send_email(
-                    subject=f"{email=} - {exchange_name} - Can't BUY {qty_to_buy_usd:.2f}$ worth of {market}, "
+                    subject=f"{email=} - {exchange_name=} - Can't BUY {qty_to_buy_usd:.2f}$ worth of {market}, "
                     f"user has only {free_usdt:.2f} USDT in account. Buying for {free_usdt} USDT worth of asset."
                 )
 
@@ -132,11 +132,11 @@ def run_bot(user_id, email, exchange_name, credentials, limit, order_notificatio
             except:
                 traceback_str = traceback.format_exc()
                 send_email(
-                    subject=f"{email=} - {exchange_name} - {market=} - Error placing BUY order.",
+                    subject=f"{email=} - {exchange_name=} - {market=} - Error placing BUY order.",
                     body=traceback_str,
                 )
                 LOG.exception(
-                    f"{email=} - {exchange_name} - {market=} - Error placing BUY order."
+                    f"{email=} - {exchange_name=} - {market=} - Error placing BUY order."
                 )
 
         ############
@@ -144,7 +144,7 @@ def run_bot(user_id, email, exchange_name, credentials, limit, order_notificatio
         ############
         if rel_size > signal * weight:
             LOG.info(
-                f"{email=} - {exchange_name} - {market=} - {signal=} * {weight=} = {signal * weight} > {rel_size=:.2f} -> SELL"
+                f"{email=} - {exchange_name=} - {market=} - {signal=} * {weight=} = {signal * weight} > {rel_size=:.2f} -> SELL"
             )
 
             if DEBUG:
@@ -169,11 +169,11 @@ def run_bot(user_id, email, exchange_name, credentials, limit, order_notificatio
             except:
                 traceback_str = traceback.format_exc()
                 send_email(
-                    subject=f"{email=} - {exchange_name} - {market=} - Error placing BUY order.",
+                    subject=f"{email=} - {exchange_name=} - {market=} - Error placing BUY order.",
                     body=traceback_str,
                 )
                 LOG.exception(
-                    f"{email=} - {exchange_name} - {market=} - Error placing SELL order."
+                    f"{email=} - {exchange_name=} - {market=} - Error placing SELL order."
                 )
 
         if order:
@@ -184,7 +184,7 @@ def run_bot(user_id, email, exchange_name, credentials, limit, order_notificatio
             # add order to DB
             bot.write_order_to_db(order)
             LOG.info(
-                f"{email=} - {exchange_name} - {market=} - Order added to database!"
+                f"{email=} - {exchange_name=} - {market=} - Order added to database!"
             )
 
             # send email
@@ -194,7 +194,7 @@ def run_bot(user_id, email, exchange_name, credentials, limit, order_notificatio
                 order.update({"original_data": order_data})
                 subject = f"{order['side']} {order['type']} order executed for {market} on {exchange_name} at {order['datetime']:%Y-%m-%d %H:%M:%S} UTC"
                 send_email(receipient=email, subject=subject, html=json2html.convert(order))
-                LOG.info(f"{email=} - {exchange_name} - Mail sent to {email}!")
+                LOG.info(f"{email=} - {exchange_name=} - Mail sent to {email}!")
 
 
 def main():
