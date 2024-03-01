@@ -242,6 +242,7 @@ def main():
                     ),
                     exchange_name=row["exchange_name"],
                     limit=99999,
+                    order_notification=row["order_notification"],
                     engine=ENGINE,
                 )
 
