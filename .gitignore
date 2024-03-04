@@ -1,5 +1,6 @@
 __pycache__/
 .env
+cmd.md
 encrypt_data.py
 logs/
 order_response_examples/

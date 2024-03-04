@@ -1,3 +1,4 @@
+import logging
 import os
 import math
 import json
@@ -7,7 +8,7 @@ from pathlib import Path
 
 import pandas as pd
 from sqlalchemy import create_engine
-from infisical import InfisicalClient
+# from infisical import InfisicalClient
 from json2html import json2html
 from dotenv import load_dotenv
 
@@ -17,20 +18,22 @@ from bot.utils import setup_logger, send_email, decrypt_data
 load_dotenv()
 
 
-# load secret token
-infisical = InfisicalClient(token=os.getenv("INFISICAL_TOKEN"))
-# load all env variables
-infisical.get_all_secrets(attach_to_os_environ=True)
+# # load secret token
+# infisical = InfisicalClient(token=os.getenv("INFISICAL_TOKEN"))
+# # load all env variables
+# infisical.get_all_secrets(attach_to_os_environ=True)
 
 # constants
 BASE_DIR = Path(__file__).parent
-LOG_DIR = BASE_DIR / "logs"
-LOG_DIR.mkdir(exist_ok=True)
-LOG = setup_logger(
-    logger_name="bot",
-    log_config_file=BASE_DIR / "logging.yaml",
-    log_file=LOG_DIR / "trading_bot.log",
-)
+# LOG_DIR = BASE_DIR / "logs"
+# LOG_DIR.mkdir(exist_ok=True)
+# LOG = setup_logger(
+#     logger_name="bot",
+#     log_config_file=BASE_DIR / "logging.yaml",
+#     log_file=LOG_DIR / "trading_bot.log",
+# )
+LOG = logging.getLogger()
+LOG.setLevel("INFO")
 DB_URL = os.getenv("TRADING_BOT_DB")
 ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY")
 ENGINE = create_engine(DB_URL.replace("postgres://", "postgresql://"))
@@ -197,7 +200,7 @@ def run_bot(user_id, email, exchange_name, credentials, limit, order_notificatio
                 LOG.info(f"{email=} - {exchange_name=} - Mail sent to {email}!")
 
 
-def main():
+def lambda_handler(event=None, context=None):
     # get users
     users_data = pd.read_sql(
         """
@@ -248,4 +251,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    lambda_handler()

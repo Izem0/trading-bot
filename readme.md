@@ -7,6 +7,8 @@ Here is how it works: I have a database where I put some configurations details 
 
 Then every day at midnight UTC, the program pulls market data (namely close price), compute buy/sell signals based on the strategy and executes the trade if a signal is found. A mail is then sent with the order details. Orders are saved in the database. I also have a routine that is triggered every day to get and store the balance of the users in the database.
 
+The program is hosted on AWS as a lambda function using a Docker image.
+
 ## Features
 * Automated trading based on user-defined portfolio configurations (which markets to trade with which weights ex. BTCUSDT weight=60%, ETHUSDT weight=40%)
 * Support for multiple cryptocurrency exchanges (currently Binance, Bybit and Kucoin)

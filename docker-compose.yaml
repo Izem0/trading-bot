@@ -1,0 +1,17 @@
+version: "3"
+
+services:
+  lambda_function:
+    image: trading-bot
+    container_name: trading-bot
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      - BUILDKIT_PLATFORMS=linux/amd64
+    ports:
+      - 9000:8080
+    # command: main.lambda_handler
+    command: main.lambda_handler
