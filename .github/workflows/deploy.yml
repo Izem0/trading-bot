@@ -29,6 +29,7 @@ jobs:
 
       - name: Upload .env to EC2
         run: |
+          echo ${DOTENV} > .env
           echo "DEBUG=0" >> .env
           scp -i ~/.ssh/private_key .env ${USER}@${EC2_HOST}:${WORKDIR}
         env:
@@ -36,6 +37,7 @@ jobs:
           STRATEGIES: ${{ secrets.STRATEGIES }}
           WORKDIR: ${{ secrets.WORKDIR }}
           USER: ${{ secrets.USER }}
+          DOTENV: ${{ secrets.DOTENV }}
 
       - name: Upload strategies.py to EC2
         run: |
