@@ -29,7 +29,10 @@ jobs:
 
       - name: Upload .env to EC2
         run: |
-          echo ${DOTENV} > .env
+          echo ${ENCRYPTION_KEY} >> .env
+          echo ${GMAIL_ADDRESS} >> .env
+          echo ${GMAIL_PASSWORD} >> .env
+          echo ${TRADING_BOT_DB} >> .env
           echo "DEBUG=0" >> .env
           scp -i ~/.ssh/private_key .env ${USER}@${EC2_HOST}:${WORKDIR}
         env:
@@ -37,7 +40,10 @@ jobs:
           STRATEGIES: ${{ secrets.STRATEGIES }}
           WORKDIR: ${{ secrets.WORKDIR }}
           USER: ${{ secrets.USER }}
-          DOTENV: ${{ secrets.DOTENV }}
+          ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_PASSWORD: ${{ secrets.GMAIL_PASSWORD }}
+          TRADING_BOT_DB: ${{ secrets.TRADING_BOT_DB }}
 
       - name: Upload strategies.py to EC2
         run: |
