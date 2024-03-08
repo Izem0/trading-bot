@@ -1,66 +1,48 @@
-name: CI/CD
+name: Deploy to EC2 using ssh
 
 on:
   push:
     branches:
       - main
 
+env:
+  SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+  EC2_HOST: ${{ secrets.EC2_HOST }}
+  WORKDIR: ${{ secrets.SSH_PRIVATE_KEY }}
+  EC2_USER: ${{ secrets.EC2_USER }}
+
 jobs:
-  publish_docker_image:
+  deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Repository
+      - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
+      - name: Create known_hosts file
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${EC2_HOST} >> ~/.ssh/known_hosts
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-      
-      - name: Create strategies.py file
-        env:
-          STRATEGIES: ${{ secrets.STRATEGIES }}
+      - name: Write SSH key to file
+        run: |
+          echo "${SSH_PRIVATE_KEY}" > ~/.ssh/private_key
+          chmod 600 ~/.ssh/private_key
+
+      - name: Upload .env to EC2
+        run: |
+          scp -i ~/.ssh/private_key prod.env ${EC2_USER}@${EC2_HOST}:${WORKDIR}
+
+      - name: Upload strategies.py to EC2
         run: |
           echo "${STRATEGIES}" > strategies.py
-      
-      - name: Build, tag, and push the image to Amazon ECR
-        id: build-image
-        env:
-          IMAGE_NAME: ${{ secrets.AWS_ECR_REGISTRY }}/${{ secrets.AWS_ECR_REPO }}:${{ github.sha }}
+          scp -i ~/.ssh/private_key strategies.py ${EC2_USER}@${EC2_HOST}:${WORKDIR}
+
+      - name: Deploy code to EC2
         run: |
-          # Build a docker container and push it to ECR 
-          echo "Building image to ECR..."
-          docker build -t $IMAGE_NAME .
-          echo "Pushing image to ECR..."
-          docker push $IMAGE_NAME
-          echo "::set-output name=image::$IMAGE_NAME"
-
-  deploy_to_lambda:
-    runs-on: ubuntu-latest
-    needs: publish_docker_image
-    steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
-
-      - name: Set up Python
-        uses: actions/setup-python@v2
-
-      - name: Install AWS CLI
-        run: |
-          pip install awscli
-
-      - name: Deploy ECR Image to Lambda
-        env:
-          IMAGE_NAME: ${{ secrets.AWS_ECR_REGISTRY }}/${{ secrets.AWS_ECR_REPO }}:${{ github.sha }}
-        run: |
-          aws lambda update-function-code --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} --image-uri $IMAGE_NAME
+          ssh -i ~/.ssh/private_key ${EC2_USER}@${EC2_HOST} <<'EOF'
+          cd ${WORKDIR}
+          git reset --hard HEAD
+          git pull origin main
+          source venv/bin/activate
+          pip install -r requirements.txt
