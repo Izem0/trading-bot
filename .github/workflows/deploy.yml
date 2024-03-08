@@ -27,12 +27,12 @@ jobs:
 
       - name: Write SSH key to file
         run: |
-          echo "${SSH_PRIVATE_KEY}" > ~/.ssh/private_key
+          echo ${SSH_PRIVATE_KEY} > ~/.ssh/private_key
           chmod 600 ~/.ssh/private_key
 
       - name: Upload .env to EC2
         run: |
-          echo "${DOTENV}" >> .env
+          echo ${DOTENV} >> .env
           echo "DEBUG=0" >> .env
           scp -i ~/.ssh/private_key .env ${EC2_USER}@${EC2_HOST}:${WORKDIR}
 
