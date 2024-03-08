@@ -29,10 +29,10 @@ jobs:
 
       - name: Upload .env to EC2
         run: |
-          echo ${ENCRYPTION_KEY} >> .env
-          echo ${GMAIL_ADDRESS} >> .env
-          echo ${GMAIL_PASSWORD} >> .env
-          echo ${TRADING_BOT_DB} >> .env
+          echo ENCRYPTION_KEY=${ENCRYPTION_KEY} >> .env
+          echo GMAIL_ADDRESS=${GMAIL_ADDRESS} >> .env
+          echo GMAIL_PASSWORD=${GMAIL_PASSWORD} >> .env
+          echo TRADING_BOT_DB=${TRADING_BOT_DB} >> .env
           echo "DEBUG=0" >> .env
           scp -i ~/.ssh/private_key .env ${USER}@${EC2_HOST}:${WORKDIR}
         env:
