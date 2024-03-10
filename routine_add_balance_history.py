@@ -52,8 +52,10 @@ def main():
         select email, ac.id as account_connection_id, credentials, name as exchange
         from account_connections ac
         join users u on ac.user_id = u.id
-        join exchanges e on ac.exchange_id = e.id;
-    """
+        join exchanges e on ac.exchange_id = e.id
+        join portfolios p2 on ac.id = p2.account_connection_id
+        where p2.active = true;
+        """
     )
 
     for _, row in connections.iterrows():
@@ -79,7 +81,7 @@ def main():
         if DEBUG:
             LOG.debug("Debug mode, do not add balance to DB.")
             continue
-        
+
         # post data to DB
         r = db.post(balance_history, "balance_history", dtype={"assets": types.JSON})
 
