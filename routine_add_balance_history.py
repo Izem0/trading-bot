@@ -7,18 +7,12 @@ from pathlib import Path
 import pandas as pd
 from sqlalchemy import create_engine, types
 from dotenv import load_dotenv
-from infisical import InfisicalClient
 
 import exchanges
 from bot.utils import setup_logger, decrypt_data
 
 load_dotenv()
 
-
-# load secret token
-infisical = InfisicalClient(token=os.getenv("INFISICAL_TOKEN"))
-# load all env variables
-infisical.get_all_secrets(attach_to_os_environ=True)
 
 # CONSTANTS
 BASE_DIR = Path(__file__).parent
