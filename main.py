@@ -25,15 +25,13 @@ load_dotenv()
 
 # constants
 BASE_DIR = Path(__file__).parent
-# LOG_DIR = BASE_DIR / "logs"
-# LOG_DIR.mkdir(exist_ok=True)
-# LOG = setup_logger(
-#     logger_name="bot",
-#     log_config_file=BASE_DIR / "logging.yaml",
-#     log_file=LOG_DIR / "trading_bot.log",
-# )
-LOG = logging.getLogger()
-LOG.setLevel("INFO")
+LOG_DIR = BASE_DIR / "logs"
+LOG_DIR.mkdir(exist_ok=True)
+LOG = setup_logger(
+    logger_name="bot",
+    log_config_file=BASE_DIR / "logging.yaml",
+    log_file=LOG_DIR / "trading_bot.log",
+)
 DB_URL = os.getenv("TRADING_BOT_DB")
 ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY")
 ENGINE = create_engine(DB_URL.replace("postgres://", "postgresql://"))
