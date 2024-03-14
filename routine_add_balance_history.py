@@ -89,7 +89,7 @@ def main():
             LOG.info("No data added to balance")
             # send_email(subject='Error adding data to balance')
         else:
-            LOG.info("Balance data added to database")
+            LOG.info(f"Balance data added to database {r=}")
 
 
 if __name__ == "__main__":
