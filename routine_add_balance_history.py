@@ -79,7 +79,7 @@ def main():
         )
 
         if DEBUG:
-            LOG.debug("Debug mode, do not add balance to DB.")
+            LOG.info("Debug mode, do not add balance to DB.")
             continue
 
         # post data to DB
