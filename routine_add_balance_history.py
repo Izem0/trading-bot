@@ -25,7 +25,7 @@ LOG = setup_logger(
 )
 DB_URL = os.getenv("TRADING_BOT_DB")
 ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY")
-DEBUG = os.getenv("DEBUG")
+DEBUG = bool(int(os.getenv("DEBUG")))
 
 
 class Database:
