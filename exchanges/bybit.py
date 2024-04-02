@@ -287,6 +287,8 @@ class Bybit(Exchange):
 
     def _get_internal_transfer_records(self, **kwargs):
         r = self.client.get_internal_transfer_records(**kwargs)
+        if not r["result"]["list"]:
+            return pd.DataFrame()
         transfers = pd.DataFrame(r["result"]["list"])
         transfers["timestamp"] = pd.to_datetime(
             transfers["timestamp"], unit="ms", utc=True
@@ -297,6 +299,8 @@ class Bybit(Exchange):
 
     def _get_universal_transfer_records(self, **kwargs):
         r = self.client.get_universal_transfer_records(**kwargs)
+        if not r["result"]["list"]:
+            return pd.DataFrame()
         transfers = pd.DataFrame(r["result"]["list"])
         transfers["timestamp"] = pd.to_datetime(
             transfers["timestamp"], unit="ms", utc=True
