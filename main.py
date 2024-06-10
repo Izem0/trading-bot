@@ -126,7 +126,7 @@ def run_bot(user_id, email, exchange_name, credentials, limit, order_notificatio
 
             # try placing order
             try:
-                order = bot.place_order(market, side="BUY", qty=qty_to_buy_trunc)
+                order = bot.place_order(market, side="buy", qty=qty_to_buy_trunc)
                 LOG.info(
                     f"{email=} - {exchange_name=} - {market=} - Order successfully placed!"
                 )
@@ -163,7 +163,7 @@ def run_bot(user_id, email, exchange_name, credentials, limit, order_notificatio
 
             # try placing sell order
             try:
-                order = bot.place_order(market, side="SELL", qty=qty_to_sell_trunc)
+                order = bot.place_order(market, side="sell", qty=qty_to_sell_trunc)
                 LOG.info(
                     f"{email=} - {exchange_name=} - {market=} - Order successfully placed!"
                 )
