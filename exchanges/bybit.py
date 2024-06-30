@@ -248,7 +248,7 @@ class Bybit(Exchange):
         if order_type.upper() != "MARKET":
             time_in_force = "GTC"
 
-        buy_market_order = side == "BUY" and order_type.upper() == "MARKET"
+        buy_market_order = (side.upper() == "BUY") and (order_type.upper() == "MARKET")
         # For Spot Market Buy order, qty should be quote curreny amount
         if buy_market_order:
             raw_qty = qty * self.get_ticker_price(market=market)
