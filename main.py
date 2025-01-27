@@ -149,7 +149,7 @@ def run_bot(user_id, email, exchange_name, credentials, limit, order_notificatio
             )
 
             if DEBUG:
-                LOG.debug(f"Debug mode, not executing SELL order.")
+                LOG.info("Debug mode, not executing SELL order.")
                 continue
 
             # get qty to sell
