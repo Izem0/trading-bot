@@ -112,7 +112,7 @@ def camelcase_to_snakecase(string: str) -> str:
 
 
 def validate_market(market: str) -> bool:
-    return re.match("^\w+USDT$", market, flags=re.IGNORECASE)
+    return re.match(r"^\w+USDT$", market, flags=re.IGNORECASE)
 
 
 def encrypt_data(encryption_key: str, data: str) -> str:

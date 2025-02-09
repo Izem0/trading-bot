@@ -28,7 +28,7 @@ TF_MAP = {
 
 def convert_market_name(market: str) -> str:
     """Convert ETHUSDT to ETH-USDT, BTCUSDT to BTC-USDT etc."""
-    if re.match("\w+USDT", market, flags=re.IGNORECASE):
+    if re.match(r"\w+USDT", market, flags=re.IGNORECASE):
         return market.replace("USDT", "-USDT")
     return market
 
@@ -116,7 +116,7 @@ class Kucoin(Exchange):
 
     def get_symbol_qty(self, symbol: str) -> float:
         """Return the quantity of a given symbol in wallet"""
-        if re.match("\w+-USDT", symbol, flags=re.IGNORECASE):
+        if re.match(r"\w+-USDT", symbol, flags=re.IGNORECASE):
             raise ValueError(
                 f"{symbol} looks like a market, not a symbol, try removing the USDT part."
             )
@@ -197,7 +197,7 @@ class Kucoin(Exchange):
 
     def get_ticker_price(self, market: str) -> float:
         """Return price (in USDT) of a market"""
-        if not re.match("\w+-?USDT", market, flags=re.IGNORECASE):
+        if not re.match(r"\w+-?USDT", market, flags=re.IGNORECASE):
             raise ValueError(f"'{market}' is not a valid market.")
         price = self.market.get_ticker(convert_market_name(market))
         return float(price["price"])

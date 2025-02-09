@@ -85,7 +85,7 @@ class Bybit(Exchange):
 
     def get_symbol_qty(self, symbol: str) -> float:
         """Return the quantity of a given symbol in wallet"""
-        if re.match("\w+-?USDT", symbol, flags=re.IGNORECASE):
+        if re.match(r"\w+-?USDT", symbol, flags=re.IGNORECASE):
             raise ValueError(
                 f"{symbol} looks like a market, not a symbol, try removing the USDT part."
             )
