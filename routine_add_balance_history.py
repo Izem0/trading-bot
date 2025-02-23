@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 import pandas as pd
-from sqlalchemy import create_engine, types
+from sqlalchemy import create_engine, types, text
 from dotenv import load_dotenv
 
 import exchanges
@@ -26,7 +26,7 @@ LOG = setup_logger(
 DB_URL = os.getenv("TRADING_BOT_DB")
 ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY")
 DEBUG = bool(int(os.getenv("DEBUG")))
-
+ENGINE = create_engine(DB_URL.replace("postgres://", "postgresql://"))
 
 class Database:
     def __init__(self, url) -> None:
@@ -47,16 +47,18 @@ def main():
     db = Database(url=DB_URL.replace("postgres://", "postgresql://"))
 
     # get users
-    connections = db.query(
-        """
-        select email, ac.id as account_connection_id, credentials, name as exchange
-        from account_connections ac
-        join users u on ac.user_id = u.id
-        join exchanges e on ac.exchange_id = e.id
-        join portfolios p2 on ac.id = p2.account_connection_id
-        where p2.active = true;
-        """
-    )
+    with ENGINE.connect() as conn:
+        connections_query = conn.execute(text(
+            """
+            select email, ac.id as account_connection_id, credentials, name as exchange
+            from account_connections ac
+            join users u on ac.user_id = u.id
+            join exchanges e on ac.exchange_id = e.id
+            join portfolios p2 on ac.id = p2.account_connection_id
+            where p2.active = true;
+            """
+        ))
+        connections = pd.DataFrame(connections_query.all())
 
     for _, row in connections.iterrows():
         LOG.info(f"Fetching balance for {row['email']} on {row['exchange']}")
@@ -83,9 +85,16 @@ def main():
             continue
 
         # post data to DB
-        r = db.post(balance_history, "balance_history", dtype={"assets": types.JSON})
-
-        if r == 0:
+        # r = db.post(balance_history, "balance_history", dtype={"assets": types.JSON})
+        balance_history["assets"] = balance_history["assets"].apply(json.dumps)
+        record = balance_history.to_dict("records")
+        with ENGINE.connect() as conn:
+            r = conn.execute(
+                text("INSERT INTO balance_history (account_connection_id, datetime, balance_usd, assets) VALUES (:account_connection_id, :datetime, :balance_usd, :assets)"),
+                record,
+            )
+            LOG.info(r)
+        if r.rowcount != 1:
             LOG.info("No data added to balance")
             # send_email(subject='Error adding data to balance')
         else:

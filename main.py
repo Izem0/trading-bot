@@ -1,12 +1,12 @@
-import logging
 import os
 import math
 import json
+import pandas as pd
 import traceback
+import warnings
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-
-import pandas as pd
+from sqlalchemy import text
 from sqlalchemy import create_engine
 # from infisical import InfisicalClient
 from json2html import json2html
@@ -16,6 +16,8 @@ from bot.bot import TradingBot
 from bot.utils import setup_logger, send_email, decrypt_data
 
 load_dotenv()
+
+warnings.simplefilter(action='ignore', category=FutureWarning)  # remove pandas FutureWarnings
 
 
 # # load secret token
@@ -53,7 +55,7 @@ def run_bot(user_id, email, exchange_name, credentials, limit, order_notificatio
         LOG.info(f"{exchange_name} - {email=} Insufficient balance, skipping")
         return
 
-    portfolio_configs = bot.get_portfolio_configs()
+    portfolio_configs = bot.get_portfolio_configs(engine=ENGINE)
 
     for _, row in portfolio_configs.iterrows():
         # get pf config data
@@ -61,7 +63,7 @@ def run_bot(user_id, email, exchange_name, credentials, limit, order_notificatio
         base = row["base"]
         quote = row["quote"]
         market = base + quote
-        weight = row["weight"]
+        weight = float(row["weight"])
         pf_assets = portfolio_configs["base"].to_list() + ["USDT"]
         strategy = row["strategy"]
 
@@ -197,23 +199,24 @@ def run_bot(user_id, email, exchange_name, credentials, limit, order_notificatio
 
 def lambda_handler(event=None, context=None):
     # get users
-    users_data = pd.read_sql(
-        """
-        select u.id as user_id
-        , email
-        , credentials
-        , e.name as exchange_name
-        , active
-        , p.order_notification as order_notification
-        from portfolios p
-        join account_connections ac on p.account_connection_id = ac.id
-        join users u on ac.user_id = u.id
-        join exchanges e on ac.exchange_id = e.id
-        where active = true
-        ;
-    """,
-        con=ENGINE,
-    )
+    with ENGINE.connect() as conn:
+        users_data_query = conn.execute(text(
+            """
+            select u.id as user_id
+            , email
+            , credentials
+            , e.name as exchange_name
+            , active
+            , p.order_notification as order_notification
+            from portfolios p
+            join account_connections ac on p.account_connection_id = ac.id
+            join users u on ac.user_id = u.id
+            join exchanges e on ac.exchange_id = e.id
+            where active = true
+            ;
+        """,
+        ))
+        users_data = pd.DataFrame(users_data_query.all())
 
     if DEBUG:
         for _, row in users_data.iterrows():

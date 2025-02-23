@@ -1,6 +1,6 @@
 import pandas as pd
 from json2html import json2html
-from sqlalchemy import create_engine, types
+from sqlalchemy import create_engine, types, text
 
 import strategies
 import exchanges
@@ -42,29 +42,30 @@ class TradingBot:
             subject=f"{self.exchange_name} - {self.email}'s balance is too low ({balance=})."
         )
 
-    def get_portfolio_configs(self) -> pd.DataFrame:
+    def get_portfolio_configs(self, engine) -> pd.DataFrame:
         # get markets to trade for this exchange and this user
-        portfolio_configs = pd.read_sql(
-            f"""
-            select u.id as user_id
-            , pc.id as portfolio_config_id
-            , m.name
-            , m.base
-            , m.quote
-            , weight
-            , s.name as strategy
-            , active
-            from portfolio_configs pc
-            join portfolios p on pc.portfolio_id = p.id 
-            join account_connections ac on p.account_connection_id = ac.id 
-            join users u on ac.user_id = u.id 
-            join markets m on pc.market_id = m.id 
-            join exchanges e on m.exchange_id = e.id
-            join strategies s on pc.strategy_id = s.id
-            where active = true and u.id = {self.user_id} and e.name = '{self.exchange_name}';
-        """,
-            con=self.engine,
-        )
+        with engine.connect() as conn:
+            portfolio_configs_query = conn.execute(text(
+                f"""
+                select u.id as user_id
+                , pc.id as portfolio_config_id
+                , m.name
+                , m.base
+                , m.quote
+                , weight
+                , s.name as strategy
+                , active
+                from portfolio_configs pc
+                join portfolios p on pc.portfolio_id = p.id 
+                join account_connections ac on p.account_connection_id = ac.id 
+                join users u on ac.user_id = u.id 
+                join markets m on pc.market_id = m.id 
+                join exchanges e on m.exchange_id = e.id
+                join strategies s on pc.strategy_id = s.id
+                where active = true and u.id = {self.user_id} and e.name = '{self.exchange_name}';
+            """,
+            ))
+            portfolio_configs = pd.DataFrame(portfolio_configs_query.all())
         return portfolio_configs
 
     def get_signal(self, strategy, market) -> float | int:

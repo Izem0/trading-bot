@@ -1,8 +1,4 @@
-FROM python:3.12
-
-RUN apt-get update \
-    && apt-get -y install libpq-dev gcc \
-    && pip install psycopg2
+FROM python:3.12-slim
 
 WORKDIR /bot
 
