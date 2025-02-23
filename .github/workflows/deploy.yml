@@ -23,18 +23,6 @@ jobs:
         run: |
           rsync -avz --exclude='.git' . ${{ secrets.USER }}@${{ secrets.HOST }}:${{ secrets.WORKDIR }}
 
-      - name: Export environment variables
-        run: |
-          ssh ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
-          cd ${{ secrets.WORKDIR }}
-          echo ${{ secrets.STRATEGIES }} > strategies.py
-          echo ENCRYPTION_KEY=${{ secrets.ENCRYPTION_KEY }} > .env
-          echo GMAIL_ADDRESS=${{ secrets.GMAIL_ADDRESS }} >> .env
-          echo GMAIL_PASSWORD=${{ secrets.GMAIL_PASSWORD }} >> .env
-          echo TRADING_BOT_DB=${{ secrets.TRADING_BOT_DB }} >> .env
-          echo DEBUG=0 >> .env
-          EOF
-
       - name: Build and deploy with Docker Compose
         run: |
           ssh ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
