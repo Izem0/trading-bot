@@ -1,14 +1,12 @@
-# FROM public.ecr.aws/lambda/python:3.12
-FROM public.ecr.aws/lambda/python:3.10
+FROM python:3.12
 
-# Copy requirements.txt
-COPY requirements.txt ${LAMBDA_TASK_ROOT}
+RUN apt-get update \
+    && apt-get -y install libpq-dev gcc \
+    && pip install psycopg2
 
-# Install the specified packages
+WORKDIR /bot
+
+COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy function code
-COPY . ${LAMBDA_TASK_ROOT}
-
-# Set the CMD to your handler (could also be done as a parameter override outside of the Dockerfile)
-CMD [ "main.lambda_handler" ]
+COPY . .
