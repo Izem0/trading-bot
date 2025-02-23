@@ -48,12 +48,9 @@ def run_bot(user_id, email, exchange_name, credentials, limit, order_notificatio
         bot.send_api_permissions()
         return
 
-    balance = bot.check_sufficient_balance(min_balance=50)
-    if not balance < MIN_BALANCE:
-        send_email(
-            subject=f"{exchange_name} - {email}'s balance is too low.",
-            body=f"{balance=:.2f}",
-        )
+    sufficient_balance = bot.check_sufficient_balance(min_balance=MIN_BALANCE)
+    if not sufficient_balance:
+        LOG.info(f"{exchange_name} - {email=} Insufficient balance, skipping")
         return
 
     portfolio_configs = bot.get_portfolio_configs()
