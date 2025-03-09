@@ -198,6 +198,7 @@ def run_bot(user_id, email, exchange_name, credentials, limit, order_notificatio
 
 
 def lambda_handler(event=None, context=None):
+    LOG.info("Script is running")
     # get users
     with ENGINE.connect() as conn:
         users_data_query = conn.execute(text(
@@ -246,6 +247,7 @@ def lambda_handler(event=None, context=None):
                     order_notification=row["order_notification"],
                     engine=ENGINE,
                 )
+    LOG.info("Script ran successfully")
 
 
 if __name__ == "__main__":
