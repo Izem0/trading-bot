@@ -73,7 +73,7 @@ def run_bot(user_id, email, exchange_name, credentials, limit, order_notificatio
         # get relative size of that asset in portfolio
         rel_size = bot.get_relative_size(base_asset=base, pf_assets=pf_assets)
 
-        if rel_size > 1:
+        if round(rel_size, 2) > 1:
             LOG.warning(
                 f"Wrong relative size for {email=} {exchange_name} ({rel_size=:.2f}!"
             )
